@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <title>Supreme HQ | Command</title>
+    <script src="https://chronotech.github.io/supreme-hq/config.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-200 p-8">
+    <div class="max-w-5xl mx-auto">
+        <header class="mb-10 flex justify-between items-end border-b border-slate-800 pb-6">
+            <h1 class="text-3xl font-black text-white">SUPREME HQ</h1>
+            <button onclick="loadQueue()" class="text-xs font-bold text-sky-400 uppercase tracking-widest">Refresh Data</button>
+        </header>
+
+        <div id="queue" class="space-y-4"></div>
+    </div>
+
+    <div id="modal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center p-4">
+        <div class="bg-slate-900 p-8 rounded-3xl w-full max-w-lg border border-sky-500/30">
+            <h2 id="mName" class="text-xl font-bold text-white mb-2"></h2>
+            <div id="mItems" class="space-y-2 mb-6 text-sm text-slate-400"></div>
+            
+            <label class="block text-xs font-bold text-slate-500 mb-2 uppercase">Technical Routing (Graphics)</label>
+            <select id="mPrinter" class="w-full bg-slate-800 p-3 rounded-xl outline-none mb-6">
+                </select>
+
+            <div class="flex gap-4">
+                <button onclick="document.getElementById('modal').classList.add('hidden')" class="flex-1 py-3 text-slate-500 font-bold">CANCEL</button>
+                <button id="approveBtn" class="flex-[2] bg-sky-600 py-3 rounded-xl font-bold">RELEASE TO FLOOR</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function loadQueue() {
+            const res = await fetch(`${SUPREME_CONFIG.API_URL}?action=GET_PENDING`);
+            const data = await res.json();
+            const container = document.getElementById('queue');
+            container.innerHTML = data.map(job => `
+                <div onclick="openModal('${job.id}', '${job.customer}', '${encodeURIComponent(job.items)}')" class="bg-slate-900 p-6 rounded-2xl border border-slate-800 flex justify-between items-center cursor-pointer hover:border-sky-500/50 transition ${job.isrush === 'true' ? 'border-l-4 border-l-red-500' : ''}">
+                    <div>
+                        <h3 class="font-bold text-lg">${job.customer}</h3>
+                        <p class="text-xs text-slate-500">Rep: ${job.salesrep} | Due: ${job.deadline}</p>
+                    </div>
+                    <span class="text-sky-400 font-black">REVIEW →</span>
+                </div>
+            `).join('');
+        }
+
+        function openModal(id, name, itemsJson) {
+            document.getElementById('mName').innerText = name;
+            document.getElementById('mItems').innerText = "Items: " + JSON.parse(decodeURIComponent(itemsJson)).length;
+            const pSel = document.getElementById('mPrinter');
+            pSel.innerHTML = SUPREME_CONFIG.PRINTER_MODELS.map(m => `<option>${m}</option>`).join('');
+            
+            document.getElementById('approveBtn').onclick = async () => {
+                const payload = { action: 'APPROVE_JOB', jobId: id, printer: pSel.value };
+                await fetch(`${SUPREME_CONFIG.API_URL}?${new URLSearchParams(payload).toString()}`, { method: 'POST' });
+                alert("Job Released!");
+                location.reload();
+            };
+            document.getElementById('modal').classList.remove('hidden');
+        }
+        window.onload = loadQueue;
+    </script>
+</body>
+</html>
