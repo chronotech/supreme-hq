@@ -1,5 +1,5 @@
 const SUPREME_CONFIG = {
-    API_URL: "https://script.google.com/macros/s/AKfycbwa6YngtAomf_vPZPJerCVt36zp5ts3GybId0yzcF9fJ1uHNBxJkRmqfASfkz3FIl4V/exec",
+    API_URL: "https://script.google.com/macros/s/AKfycbwy6NXwdPKGU1O4BCflBJLPFzp8jKOe1fF7B5Cv869O58AFzDLOPIG3bmpu8OHpuNNP/exec",
     COMPANY_NAME: "Supreme Outdoor",
     
     // WORKFLOW STAGES
